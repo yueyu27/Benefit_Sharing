@@ -177,7 +177,7 @@ write.table(summary_by_catgory_2025, "summary_by_catgory_2025.txt", sep = "\t", 
 
 
 # -- Step 4: Extract by NUMBER OF country 
-
+library(dplyr)
 library(stringr)
 
 # ----------
@@ -197,7 +197,7 @@ summary_by_num_country_2023 <- raw_2023 %>%
 								  ungroup() %>%
 								  arrange(n_countries)
 
-write.table(summary_by_num_country_2023, "../Results_202051020/summary_by_num_country_2023.txt", sep = "\t", row.names = F, col.names = T, quote = F)
+#write.table(summary_by_num_country_2023, "../Results_202051020/summary_by_num_country_2023.txt", sep = "\t", row.names = F, col.names = T, quote = F)
 
 # ---------
 #   2024
@@ -216,7 +216,7 @@ summary_by_num_country_2024 <- raw_2024 %>%
 								  ungroup() %>%
 								  arrange(n_countries)
 
-write.table(summary_by_num_country_2024, "../Results_202051020/summary_by_num_country_2024.txt", sep = "\t", row.names = F, col.names = T, quote = F)
+#write.table(summary_by_num_country_2024, "../Results_202051020/summary_by_num_country_2024.txt", sep = "\t", row.names = F, col.names = T, quote = F)
 
 
 
@@ -237,7 +237,7 @@ summary_by_num_country_2025 <- raw_2025 %>%
 								  ungroup() %>%
 								  arrange(n_countries)
 
-write.table(summary_by_num_country_2025, "../Results_202051020/summary_by_num_country_2025.txt", sep = "\t", row.names = F, col.names = T, quote = F)
+#write.table(summary_by_num_country_2025, "../Results_202051020/summary_by_num_country_2025.txt", sep = "\t", row.names = F, col.names = T, quote = F)
 
 
 
@@ -260,41 +260,104 @@ df_2023 <- summary_by_num_country_2023 %>%
 	mutate(year = 2023)
 
 final_df <- bind_rows(df_2023,df_2024,df_2025)
+final_df <- final_df[,-3] # remove year column, to pool across year
 
 # -- Bin data (numerical into categorical)
+# -- Add standard error to summarized data
+
 summary_df <- final_df %>%
   mutate(
     country_bin = cut(
       n_countries,
-      breaks = c(0, 2, 5, 8, 11, 14),
-      labels = c("0-2", "3-5", "6-8", "9-11", "12-14"),
+      breaks = c(0, 2, 5, 8, 14),
+      labels = c("0-2", "3-5", "6-8", "9-14"),
       include.lowest = TRUE,
       right = TRUE
     )
   ) %>%
-  group_by(year, country_bin) %>%
+  group_by(country_bin) %>%
   summarise(
     mean_yes_benefit = mean(yes_benefit_percentage, na.rm = TRUE),
-    n = n()  # optional: number of observations per bin
+    sd_yes_benefit   = sd(yes_benefit_percentage, na.rm = TRUE),
+    se_yes_benefit   = sd_yes_benefit / sqrt(n()),  # standard error
+    n = n()
   ) %>%
-  arrange(year, country_bin)
+  arrange(country_bin)
+
 
 # -- set levels to categorical data, then can plot as lines (to connect them)
 summary_df$country_bin <- factor(summary_df$country_bin,
-															  levels = c("0-2", "3-5", "6-8", "9-11", "12-14"),
+															  levels = c("0-2", "3-5", "6-8", "9-14"),
 															  ordered = TRUE)
 
 
-ggplot(summary_df, aes(x = country_bin, y = mean_yes_benefit, group = factor(year), color = factor(year))) +
+# Plot all in one  (USE THIS)
+ggplot(summary_df, aes(x = factor(country_bin), y = mean_yes_benefit)) +
   geom_line(linewidth = 1.2) +
   geom_point(size = 2) +
+  geom_errorbar(aes(
+    ymin = mean_yes_benefit - se_yes_benefit, 
+    ymax = mean_yes_benefit + se_yes_benefit
+  ), width = 0.2) +
   labs(
     x = "Number of Countries",
-    y = "Yes Benefit Percentage",
-    color = "Year",
-    title = "Trend of Yes Benefit Percentage by Number of Countries"
+    y = "% Benefit-Sharing Reporting",
+    color = "Year"
   ) +
-  theme_minimal()
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.title.x = element_text(size = 15, margin = margin(t = 15)),  # larger and pushed down
+    axis.title.y = element_text(size = 15, margin = margin(r = 15)),  # larger and pushed left
+    axis.text.x  = element_text(size = 13),
+    axis.text.y  = element_text(size = 13),
+    legend.title = element_text(size = 14),
+    legend.text  = element_text(size = 12)
+  )
+
+
+
+
+
+
+# Plot per year (not used anymore)
+ggplot(summary_df, aes(
+  x = country_bin, 
+  y = mean_yes_benefit, 
+  group = factor(year), 
+  color = factor(year)
+)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(
+    ymin = mean_yes_benefit - se_yes_benefit, 
+    ymax = mean_yes_benefit + se_yes_benefit
+  ), width = 0.2) +
+  scale_color_manual(
+    values = c(
+      "2023" = "#984136",  # red
+      "2024" = "#4a3a3b",  # dark brown
+      "2025" = "#ecc0a1"   # light salmon
+    )
+  ) +
+  labs(
+    x = "Number of Countries",
+    y = "% Benefit-Sharing Reporting",
+    color = "Year"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.title.x = element_text(size = 15, margin = margin(t = 15)),  # larger and pushed down
+    axis.title.y = element_text(size = 15, margin = margin(r = 15)),  # larger and pushed left
+    axis.text.x  = element_text(size = 13),
+    axis.text.y  = element_text(size = 13),
+    legend.title = element_text(size = 14),
+    legend.text  = element_text(size = 12)
+  )
+
+
+
+
+
 
 
 

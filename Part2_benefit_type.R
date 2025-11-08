@@ -55,6 +55,7 @@ b_2023 <- b_2023[,1:5]
 head(b_2023)
 dim(b_2023)
 # 122 4
+# There is a duplicated line, thus only 121 publications have benefit sharing statements
 
 
 # ----------
@@ -83,6 +84,7 @@ b_2025 <- b_2025[,1:5]
 head(b_2025)
 dim(b_2025)
 # 98 4
+# There is a duplicated line, thus only 97 publications have benefit sharing statements
 
 
 
