@@ -31,6 +31,8 @@ sign <- read.delim("/Users/yueyu/Desktop/ABS/v2/Signed_country_list.txt",
 length(sign) # 142 countries signed
 
 
+
+
 # -----------------------------------------------
 #
 #    Step 2: Load manual checked data (done during 2025 Oct 29-31)

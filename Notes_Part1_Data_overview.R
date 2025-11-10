@@ -15,7 +15,7 @@
 # -- Step 1: Load raw data (Version 3 by Winnie) and clean
 
 getwd()
-setwd("/Users/yueyu/Desktop/ABS/v3/txt_raw")
+setwd("/Users/yueyu/Desktop/ABS/v2/txt_raw")
 
 # ----------
 #   2023
