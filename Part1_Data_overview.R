@@ -12,7 +12,12 @@
 # Local R studio
 # R version: 4.4.0
 
-# -- Step 1: Load raw data (Version 3 by Winnie) and clean
+
+# -------------------------------------------
+#
+# -- Step 1: Load raw data (Version 3 by Winnie) and clean 
+#
+# -------------------------------------------
 
 getwd()
 setwd("/Users/yueyu/Desktop/ABS/v3/txt_raw")
@@ -92,91 +97,12 @@ raw_2025$countries <- gsub(".", ",", raw_2025$countries, fixed = TRUE)
 
 
 
+# -------------------------------------------
+#
+# -- Step 2: Extract by NUMBER OF country 
+#
+# -------------------------------------------
 
-
-# -- Step 2: # of papers with benefit statement
-
-library(dplyr)
-# ----------
-#   2023
-# ----------
-raw_2023 %>% summarise(blank_or_none = sum(trimws(tolower(benefit)) %in% c("", "none"), na.rm = TRUE))
-# 291 blank or none (out of 419)
-
-
-# ----------
-#   2024
-# ----------
-raw_2024 %>% summarise(blank_or_none = sum(trimws(tolower(benefit)) %in% c("", "none"), na.rm = TRUE))
-# 179 blank or none (out of 321)
-
-# ----------
-#   2025
-# ----------
-raw_2025 %>% summarise(blank_or_none = sum(trimws(tolower(benefit)) %in% c("", "none"), na.rm = TRUE))
-# 161 blank or none (out of 260)
-
-
-
-# -- Step 3: Extract by topic category (DO NOT INCLUDE)
-
-library(dplyr)
-
-# ----------
-#   2023
-# ----------
-summary_by_catgory_2023 <- raw_2023 %>%
-								  group_by(category) %>%
-								  summarise(
-								    count = n(),
-								    no_benefit = sum(trimws(benefit) == "" | is.na(benefit)),
-								    yes_benefit = count - no_benefit,
-								    yes_benefit_percentage = round((yes_benefit / count) * 100, digits = 3)
-								  ) %>%
-								  ungroup() %>%
-								  arrange(desc(yes_benefit_percentage))
-
-write.table(summary_by_catgory_2023, "summary_by_catgory_2023.txt", sep = "\t", row.names = F, col.names = T, quote = F)
-
-
-# ----------
-#   2024
-# ----------
-
-summary_by_catgory_2024 <- raw_2024 %>%
-								  group_by(category) %>%
-								  summarise(
-								    count = n(),
-								    no_benefit = sum(trimws(benefit) == "" | is.na(benefit)),
-								    yes_benefit = count - no_benefit,
-								    yes_benefit_percentage = round((yes_benefit / count) * 100, digits = 3)
-								  ) %>%
-								  ungroup() %>%
-								  arrange(desc(yes_benefit_percentage))
-write.table(summary_by_catgory_2024, "summary_by_catgory_2024.txt", sep = "\t", row.names = F, col.names = T, quote = F)
-
-
-# ----------
-#   2025
-# ----------
-
-summary_by_catgory_2025 <- raw_2025 %>%
-								  group_by(category) %>%
-								  summarise(
-								    count = n(),
-								    no_benefit = sum(trimws(benefit) == "" | is.na(benefit)),
-								    yes_benefit = count - no_benefit,
-								    yes_benefit_percentage = round((yes_benefit / count) * 100, digits = 3)
-								  ) %>%
-								  ungroup() %>%
-								  arrange(desc(yes_benefit_percentage))
-
-write.table(summary_by_catgory_2025, "summary_by_catgory_2025.txt", sep = "\t", row.names = F, col.names = T, quote = F)
-
-
-
-
-# -- Step 4: Extract by NUMBER OF country 
 library(dplyr)
 library(stringr)
 
@@ -291,235 +217,28 @@ summary_df$country_bin <- factor(summary_df$country_bin,
 															  ordered = TRUE)
 
 
-# Plot all in one  (USE THIS)
-ggplot(summary_df, aes(x = factor(country_bin), y = mean_yes_benefit)) +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 2) +
+
+# Plot all in one
+ggplot(summary_df, aes(x = country_bin, y = mean_yes_benefit, group = 1)) +
+  geom_line(linewidth = 1.2, color = "#33271e") +  # line color
+  geom_point(size = 3, color = "#33271e") +        # point color
   geom_errorbar(aes(
-    ymin = mean_yes_benefit - se_yes_benefit, 
+    ymin = mean_yes_benefit - se_yes_benefit,
     ymax = mean_yes_benefit + se_yes_benefit
-  ), width = 0.2) +
+  ), width = 0.2, color = "#33271e") + # same color as above
   labs(
     x = "Number of Countries",
-    y = "% Benefit-Sharing Reporting",
-    color = "Year"
+    y = "% Benefit-Sharing Reporting"
   ) +
   theme_minimal(base_size = 14) +
   theme(
-    axis.title.x = element_text(size = 15, margin = margin(t = 15)),  # larger and pushed down
-    axis.title.y = element_text(size = 15, margin = margin(r = 15)),  # larger and pushed left
+    axis.title.x = element_text(size = 15, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 15, margin = margin(r = 15)),
     axis.text.x  = element_text(size = 13),
-    axis.text.y  = element_text(size = 13),
-    legend.title = element_text(size = 14),
-    legend.text  = element_text(size = 12)
+    axis.text.y  = element_text(size = 13)
   )
 
 
-
-
-
-
-# Plot per year (not used anymore)
-ggplot(summary_df, aes(
-  x = country_bin, 
-  y = mean_yes_benefit, 
-  group = factor(year), 
-  color = factor(year)
-)) +
-  geom_line(linewidth = 1.2) +
-  geom_point(size = 2) +
-  geom_errorbar(aes(
-    ymin = mean_yes_benefit - se_yes_benefit, 
-    ymax = mean_yes_benefit + se_yes_benefit
-  ), width = 0.2) +
-  scale_color_manual(
-    values = c(
-      "2023" = "#984136",  # red
-      "2024" = "#4a3a3b",  # dark brown
-      "2025" = "#ecc0a1"   # light salmon
-    )
-  ) +
-  labs(
-    x = "Number of Countries",
-    y = "% Benefit-Sharing Reporting",
-    color = "Year"
-  ) +
-  theme_minimal(base_size = 14) +
-  theme(
-    axis.title.x = element_text(size = 15, margin = margin(t = 15)),  # larger and pushed down
-    axis.title.y = element_text(size = 15, margin = margin(r = 15)),  # larger and pushed left
-    axis.text.x  = element_text(size = 13),
-    axis.text.y  = element_text(size = 13),
-    legend.title = element_text(size = 14),
-    legend.text  = element_text(size = 12)
-  )
-
-
-
-
-
-
-
-
-
-# -- Step 5: Extract country NAME in with/withOUT benefit sharing
-
-library(dplyr)
-library(tidyr)
-
-
-# ----------
-#   2023
-# ----------
-
-name_NO_benefit_2023 <- raw_2023 %>%
-  filter(benefit == "") %>%
-  select(countries) %>%
-  separate_rows(countries, sep = ",") %>%
-  mutate(countries = trimws(countries), countries = str_to_title(countries)) %>%
-  count(countries, name = "NO_benefit_count") %>%
-  arrange(desc(NO_benefit_count))
-
-name_YES_benefit_2023 <- raw_2023 %>%
-  filter(benefit != "") %>%
-  select(countries) %>%
-  separate_rows(countries, sep = ",") %>%
-  mutate(countries = trimws(countries), countries = str_to_title(countries)) %>%
-  count(countries, name = "YES_benefit_count") %>%
-  arrange(desc(YES_benefit_count))
-
-# Merge, show all countires with benefit and without 
-name_country_all_2023 <- full_join(
-															  name_NO_benefit_2023,
-															  name_YES_benefit_2023,
-															  by = "countries") %>%
-															  # Replace missing values (if a country only appears in one df) with 0
-															  mutate(
-															    NO_benefit_count = replace_na(NO_benefit_count, 0),
-															    YES_benefit_count = replace_na(YES_benefit_count, 0)) %>% 
-															  mutate(sum = NO_benefit_count + YES_benefit_count) %>%
-															  mutate(NO_benefit_pro = NO_benefit_count/sum) %>%
-															  mutate(YES_benefit_pro = YES_benefit_count/sum) %>%
-															  arrange(desc(YES_benefit_pro))
-
-
-write.table(name_country_all_2023, "../Results_202051020/Ranked_country_name_2023.txt", sep = "\t", row.names = F, col.names = T, quote = F)
-
-
-
-
-# ----------
-#   2024
-# ----------
-
-# Regex wildcard replace odd country name inputs
-raw_2024$countries <- gsub("T.?Rkiye", "Turkey", raw_2024$countries, ignore.case = TRUE)
-
-name_NO_benefit_2024 <- raw_2024 %>%
-  filter(benefit == "") %>%
-  select(countries) %>%
-  separate_rows(countries, sep = ",") %>%
-  mutate(countries = trimws(countries), countries = str_to_title(countries)) %>%
-  count(countries, name = "NO_benefit_count") %>%
-  arrange(desc(NO_benefit_count))
-
-
-name_YES_benefit_2024 <- raw_2024 %>%
-  filter(benefit != "") %>%
-  select(countries) %>%
-  separate_rows(countries, sep = ",") %>%
-  mutate(countries = trimws(countries), countries = str_to_title(countries)) %>%
-  count(countries, name = "YES_benefit_count") %>%
-  arrange(desc(YES_benefit_count))
-
-
-name_country_all_2024 <- full_join(
-															  name_NO_benefit_2024,
-															  name_YES_benefit_2024,
-															  by = "countries") %>%
-															  # Replace missing values (if a country only appears in one df) with 0
-															  mutate(
-															    NO_benefit_count = replace_na(NO_benefit_count, 0),
-															    YES_benefit_count = replace_na(YES_benefit_count, 0)) %>% 
-															  mutate(sum = NO_benefit_count + YES_benefit_count) %>%
-															  mutate(NO_benefit_pro = NO_benefit_count/sum) %>%
-															  mutate(YES_benefit_pro = YES_benefit_count/sum) %>%
-															  arrange(desc(YES_benefit_pro))
-
-write.table(name_country_all_2024, "../Results_202051020/Ranked_country_name_2024.txt", sep = "\t", row.names = F, col.names = T, quote = F)
-
-
-
-
-# ----------
-#   2025
-# ----------
-
-# Regex wildcard replace odd country name inputs
-raw_2025$countries <- gsub("C.?Te D'ivoire", "Cote dIvoire", raw_2025$countries, ignore.case = TRUE)
-raw_2025$countries <- gsub("C.?Te Dõivoire", "Cote dIvoire", raw_2025$countries, ignore.case = TRUE)
-raw_2025$countries <- gsub("R.?Publique De Guin.?E", "Republique de Guinee", raw_2025$countries, ignore.case = TRUE)
-
-
-name_NO_benefit_2025 <- raw_2025 %>%
-  filter(benefit == "") %>%
-  select(countries) %>%
-  separate_rows(countries, sep = ",") %>%
-  mutate(countries = trimws(countries), countries = str_to_title(countries)) %>%
-  count(countries, name = "NO_benefit_count") %>%
-  arrange(desc(NO_benefit_count))
-
-name_YES_benefit_2025 <- raw_2025 %>%
-  filter(benefit != "") %>%
-  select(countries) %>%
-  separate_rows(countries, sep = ",") %>%
-  mutate(countries = trimws(countries), countries = str_to_title(countries)) %>%
-  count(countries, name = "YES_benefit_count") %>%
-  arrange(desc(YES_benefit_count))
-  
-name_country_all_2025 <- full_join(
-															  name_NO_benefit_2025,
-															  name_YES_benefit_2025,
-															  by = "countries") %>%
-															  # Replace missing values (if a country only appears in one df) with 0
-															  mutate(
-															    NO_benefit_count = replace_na(NO_benefit_count, 0),
-															    YES_benefit_count = replace_na(YES_benefit_count, 0)) %>% 
-															  mutate(sum = NO_benefit_count + YES_benefit_count) %>%
-															  mutate(NO_benefit_pro = NO_benefit_count/sum) %>%
-															  mutate(YES_benefit_pro = YES_benefit_count/sum) %>%
-															  arrange(desc(YES_benefit_pro))
-
-unique(name_country_all_2025$countries)
-
-write.table(name_country_all_2025, "../Results_202051020/Ranked_country_name_2025.txt", sep = "\t", row.names = F, col.names = T, quote = F)
-
-# --- CONCLUSION --
-# Can use Binomial Confidence Interval for each country and then see the observed value of YES-BENEFIT if it falls within the predicted range
-# But this is not the focus of the study, so I will not do this step
-# Conclusion for this part: it is not very compariable, just to get an idea of each country's publication count and proportion of including ABS
-
-
-
-
-
-
-
-
-
-# -- Step 6: Key words extract (for Nagoya Protocol)
-# Link to ABS: https://www.cbd.int/abs/text/articles?sec=abs-37
-
-collaboration OR coauthorship
-technology transfer
-capacity building OR training
-contributions to the local economy (hire a local guide etc)
-research towards conservation
-database
-
-
-
-
-
+# Figure 1 
 
 # END

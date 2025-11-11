@@ -1,7 +1,7 @@
 #####################################
 # Project: Benefit sharing
 #
-# Part 2: Extract Benefit type
+# Part 3: Extract Benefit type
 #
 # 2025 October 28
 # by: Yue Yu
@@ -54,8 +54,8 @@ b_2023 <- b_2023[,1:5]
 
 head(b_2023)
 dim(b_2023)
-# 122 4
-# There is a duplicated line, thus only 121 publications have benefit sharing statements
+# 123 4
+# There is a duplicated line, thus only 122 publications have benefit sharing statements
 
 
 # ----------
@@ -83,8 +83,8 @@ b_2025 <- b_2025[,1:5]
 
 head(b_2025)
 dim(b_2025)
-# 98 4
-# There is a duplicated line, thus only 97 publications have benefit sharing statements
+# 119 4
+# There is a duplicated line, thus only 118 publications have benefit sharing statements
 
 
 
@@ -153,8 +153,6 @@ b_2023 <- b_2023 %>% select(-coauthorship_ABS)
 #
 # -----------------------------------------------
 
-dim(b_2023)
-# 122 10
 write.table(b_2023, file="ABS_code_2023_type_added.txt", sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE, na = "")
 
 
@@ -200,8 +198,7 @@ b_2024 <- b_2024 %>%
   mutate(benefit_F = ifelse( grepl("consent", benefit,ignore.case = TRUE) | grepl("permit", benefit,ignore.case = TRUE)| grepl("equal", benefit,ignore.case = TRUE) , "F", NA)) %>% 
   select(-coauthorship_ABS)
 
-dim(b_2024)
-# 137 10
+
 write.table(b_2024, file="ABS_code_2024_type_added.txt", sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE, na = "")
 
 
@@ -220,8 +217,6 @@ b_2025 <- b_2025 %>%
   mutate(benefit_F = ifelse( grepl("consent", benefit,ignore.case = TRUE) | grepl("permit", benefit,ignore.case = TRUE)| grepl("equal", benefit,ignore.case = TRUE) , "F", NA)) %>% 
   select(-coauthorship_ABS)
 
-dim(b_2025)
-# 98 10
 write.table(b_2025, file="ABS_code_2025_type_added.txt", sep = "\t", row.names = FALSE, col.names = TRUE, quote = FALSE, na = "")
 
 
