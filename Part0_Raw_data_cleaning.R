@@ -1,14 +1,12 @@
 #####################################
 # Project: Benefit sharing
 #
-# Part 0: data cleaning
+# Part 0: Data cleaning
 #
 # 2025 Nov 10
 # by: Yue Yu
 #
 #####################################
-
-
 
 
 # Local R studio

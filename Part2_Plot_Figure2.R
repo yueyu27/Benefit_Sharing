@@ -14,7 +14,12 @@
 # R version: 4.4.0
 
 library(dplyr)
+library(tidyr)
 library(stringr)
+library(PNWColors)
+library(ggplot2)
+library(patchwork)
+
 
 
 # -------------------------------------------
@@ -33,8 +38,8 @@ new_raw_2023_clean <- read.delim("/Users/yueyu/Desktop/ABS/v3/txt_raw_clean/raw_
                       stringsAsFactors = FALSE)
 
 unique(new_raw_2023_clean$species)
-[1] "seed_plant"   "invertebrate" "ecosystem"    "other"       
-[5] "vertebrate"   "fungi"        "bacteria"
+#[1] "seed_plant"   "invertebrate" "ecosystem"    "other"       
+#[5] "vertebrate"   "fungi"        "bacteria"
 
 
 # ----------
@@ -48,8 +53,8 @@ new_raw_2024_clean <- read.delim("/Users/yueyu/Desktop/ABS/v3/txt_raw_clean/raw_
 new_raw_2024_clean$species <- gsub(" vertebrate", "vertebrate", new_raw_2024_clean$species)
 
 unique(new_raw_2024_clean$species)
-[1] "vertebrate"   "invertebrate" "bacteria"     "other"       
-[5] "seed_plant"   "ecosystem"    "fungi"
+#[1] "vertebrate"   "invertebrate" "bacteria"     "other"       
+#[5] "seed_plant"   "ecosystem"    "fungi"
 
 
 # ----------
@@ -61,8 +66,8 @@ new_raw_2025_clean <- read.delim("/Users/yueyu/Desktop/ABS/v3/txt_raw_clean/raw_
                       stringsAsFactors = FALSE)
 
 unique(new_raw_2025_clean$species)
-[1] "vertebrate"   "other"        "invertebrate" "seed_plant"  
-[5] "ecosystem"    "fungi"        "bacteria"
+#[1] "vertebrate"   "other"        "invertebrate" "seed_plant"  
+#[5] "ecosystem"    "fungi"        "bacteria"
 
 
 
@@ -102,9 +107,9 @@ pool <- pool %>%
     all_in_sign = all(country_list %in% sign_countries),
     any_in_sign = any(country_list %in% sign_countries),
     country_type = case_when(
-      all_in_sign ~ "Party (Full)",
+      all_in_sign ~ "Party (All)",
       !any_in_sign ~ "Non-Party",
-      TRUE ~ "Party (Partial)"
+      TRUE ~ "Party (Mixed)"
     )
   ) %>%
   ungroup() %>%
@@ -119,10 +124,6 @@ pool <- pool %>%
 # -- Step 4: with/withOUT benefit sharing
 #
 # -------------------------------------------
-
-library(dplyr)
-library(tidyr)
-
 
 # Create a new column to indicate whether 'benefit' is blank or not
 pool <- pool %>%
@@ -144,7 +145,7 @@ country_summary <- pool %>%
 # country_type    blank not_blank 
 #  Non-Party         209       121
 #  Party (Full)      231        97
-#  Party (Partial)   255       162
+#  Party (Mixed)   255       162
 
 
 
@@ -180,9 +181,6 @@ species_summary <- pool %>%
 #
 # -------------------------------------------
 
-library(ggplot2)
-library(dplyr)
-library(tidyr)
 
 #  == Species plot
 
@@ -205,8 +203,8 @@ a <- ggplot(species_long, aes(x = species, y = count, fill = species)) +
     labels = abs(seq(-300, 200, by = 100))      # show all labels as positive
   ) +     
   labs(
-    x = "Species Category",
-    y = "Number of publications"
+    x = "Taxon",
+    y = ""
   ) +
   theme_minimal(base_size = 14) +
   theme(
@@ -241,8 +239,8 @@ b <- ggplot(country_long, aes(x = country_type, y = count, fill = country_type))
     labels = abs(seq(-300, 200, by = 100))      # show all labels as positive
   ) +     
   labs(
-    x = "Country Category",
-    y = ""
+    x = "Nagoya Protocol Status",
+    y = "Number of publications"
   ) +
   theme_minimal(base_size = 14) +
   theme(
@@ -258,9 +256,8 @@ b <- ggplot(country_long, aes(x = country_type, y = count, fill = country_type))
 
 
 # Combine plots next to each other
-# library(patchwork)
 
-combined_plot <- a | b  # use p1 | p2 for side-by-side
+combined_plot <- b | a  # use p1 | p2 for side-by-side
 combined_plot
 
 # Figure 2 done

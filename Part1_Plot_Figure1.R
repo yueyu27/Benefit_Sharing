@@ -12,7 +12,6 @@
 # Local R studio
 # R version: 4.4.0
 
-
 # -------------------------------------------
 #
 # -- Step 1: Load raw data (Version 3 by Winnie) and clean 
@@ -21,6 +20,10 @@
 
 getwd()
 setwd("/Users/yueyu/Desktop/ABS/v3/txt_raw")
+
+library(dplyr)
+library(stringr)
+library(ggplot2)
 
 # ----------
 #   2023
@@ -102,10 +105,6 @@ raw_2025$countries <- gsub(".", ",", raw_2025$countries, fixed = TRUE)
 # -- Step 2: Extract by NUMBER OF country 
 #
 # -------------------------------------------
-
-library(dplyr)
-library(stringr)
-
 # ----------
 #   2023
 # ----------
@@ -170,8 +169,6 @@ summary_by_num_country_2025 <- raw_2025 %>%
 # ---------
 #   MERGE + PLOT
 # ----------
-library(dplyr)
-library(ggplot2)
 
 df_2025 <- summary_by_num_country_2025 %>%
   select(n_countries, yes_benefit_percentage) %>%
@@ -215,7 +212,6 @@ summary_df <- final_df %>%
 summary_df$country_bin <- factor(summary_df$country_bin,
 															  levels = c("0-2", "3-5", "6-8", "9-14"),
 															  ordered = TRUE)
-
 
 
 # Plot all in one

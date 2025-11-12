@@ -1,10 +1,7 @@
 #####################################
 # Project: Benefit sharing
 #
-# Part 1: Overview of Data from 2023 - 2025
-#
-# 2025 Nov 10
-# by: Yue Yu
+# NOTE: not used in final paper
 #
 #####################################
 

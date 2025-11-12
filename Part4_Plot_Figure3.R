@@ -1,7 +1,7 @@
 #####################################
 # Project: Benefit sharing
 #
-# Part 4: Plot manually checked final benefit types (plot 2023-2025 in one)
+# Part 4: Plot manually checked final benefit types (plot 2023-2025 in one) - Figure 3
 #
 # 2025 Nov 10
 # by: Yue Yu
@@ -23,6 +23,8 @@ setwd("/Users/yueyu/Desktop/ABS/v3/txt_benefit_code")
 library(dplyr)
 library(tidyverse)
 library(PNWColors)
+library(stringr)
+
 
 
 # ----------
@@ -291,10 +293,6 @@ pool <- pool[,c(4,5)]
 # -- If all countires for a publication is NOT within sign list -> NO_ABS_country
 # -- If all countires for a publication is mixed with both -> mixed_ABS_country
 
-library(dplyr)
-library(stringr)
-
-
 sign <- read.delim("/Users/yueyu/Desktop/ABS/v3/Signed_country_list.txt",
                       header = TRUE,
                       colClasses = "character",
@@ -312,19 +310,14 @@ pool <- pool %>%
     all_in_sign = all(country_list %in% sign_countries),
     any_in_sign = any(country_list %in% sign_countries),
     country_type = case_when(
-      all_in_sign ~ "Party (Full)",
+      all_in_sign ~ "Party (All)",
       !any_in_sign ~ "Non-Party",
-      TRUE ~ "Party (Partial)"
+      TRUE ~ "Party (Mixed)"
     )
   ) %>%
   ungroup() %>%
   select(-country_list, -all_in_sign, -any_in_sign)
 
-
-# Nagoya Protocol Status
-#- Party (Full)
-#- Party (Partial)
-#- Non-Party
 
 
 # -- LONG FORMAT
@@ -355,7 +348,7 @@ summary_prop <- summary_counts %>%
 
 summary_prop$country_type <- factor(
   summary_prop$country_type,
-  levels = c("Party (Partial)", "Non-Party", "Party (Full)")
+  levels = c("Party (Mixed)", "Non-Party", "Party (All)")
 )
 
 pal1 <- c("#81a9ad","#537380","#334540")
@@ -379,15 +372,13 @@ p2 <- ggplot(summary_prop, aes(x = benefit_summary, y = prop, fill = country_typ
     axis.text.y = element_text(size = 12)
   )
 
+# Combine plots next to each other
+library(patchwork)
 
 combined_plot <- p1 | p2  # use p1 | p2 for side-by-side
 combined_plot
 
-
 # Figure 3 done
-
-
-
 
 
 
@@ -414,7 +405,7 @@ merged_2023_subset <- merged_2023_subset %>%
     all_in_sign = all(country_list %in% sign_countries),
     any_in_sign = any(country_list %in% sign_countries),
     country_type = case_when(
-      all_in_sign ~ "Party (Full)",
+      all_in_sign ~ "Party (All)",
       !any_in_sign ~ "Non-Party",
       TRUE ~ "Party (Partial)"
     )
@@ -454,14 +445,13 @@ merged_2023_ref <- merged_2023_subset %>%
 
 # == Subset
 small_2023 <- merged_2023_ref[,c(4,3,8,12)]
-colnames(small_2023) <- c("Benefit Category","Species Category", "Country Category","Reference")
+colnames(small_2023) <- c("Benefit Category","Taxon", "Nagoya Protocol Status","Reference")
 head(small_2023)
 dim(small_2023)
 
 
-# == SAVE (EXCEL DITECTLY)
-write_xlsx(small_2023, "/Users/yueyu/Desktop/ABS/v3/Figure_Table/Table3.xlsx")
-
+# == SAVE
+write.table(small_2023, "/Users/yueyu/Desktop/ABS/v3/Figure_Table/Table3.txt", sep = "\t", row.names = F, col.names = T, quote = F)
 write.table(merged_2023_ref, "/Users/yueyu/Desktop/ABS/v3/Figure_Table/Final_Ref_Check/Table3_full_ref.txt", sep = "\t", row.names = F, col.names = T, quote = F)
 
 
@@ -525,7 +515,6 @@ dim(small_2024)
 
 # == SAVE (EXCEL DITECTLY)
 write.table(small_2024, "/Users/yueyu/Desktop/ABS/v3/Figure_Table/Table4.txt", sep = "\t", row.names = F, col.names = T, quote = F)
-
 write.table(merged_2024_ref, "/Users/yueyu/Desktop/ABS/v3/Figure_Table/Final_Ref_Check/Table4_full_ref.txt", sep = "\t", row.names = F, col.names = T, quote = F)
 
 
@@ -594,11 +583,12 @@ dim(small_2025)
 
 # == SAVE (EXCEL DITECTLY)
 write.table(small_2025, "/Users/yueyu/Desktop/ABS/v3/Figure_Table/Table5.txt", sep = "\t", row.names = F, col.names = T, quote = F)
-
 write.table(merged_2025_ref, "/Users/yueyu/Desktop/ABS/v3/Figure_Table/Final_Ref_Check/Table5_full_ref.txt", sep = "\t", row.names = F, col.names = T, quote = F)
 
-# Manually check any NA for reference 
 
+
+# Manually check any NA for reference 
+# Some First author last names can be in special character, not captured in this code, require manual check to fill in "Reference" column
 
 # TABLE 3,4,5 DONE
 
