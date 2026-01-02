@@ -10,7 +10,7 @@ Code for Molecular Ecology Editorial: *Update on Sharing and Reporting Benefits 
 
 **Part 3**: Identify benefit types
 
-**Part 4**: Plot Figure 3 and prepare Table 3,4 and 5
+**Part 4**: Plot Figure 3 and prepare TableS5
 
 **Part 5**: Submission data cleaning
 
